@@ -1,14 +1,16 @@
 import pygame
 
-# general setup
+import random
+
+from os.path import join
+
+
+# informacoes gerais
+
 
 pygame.init()
 
 pygame.display.set_caption("Space Shooter")
-
-surf = pygame.Surface ((100, 200))
-
-surf.fill ("black")
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 
@@ -16,14 +18,78 @@ displaySurface = pygame.display.set_mode ((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 running = True
 
+clock = pygame.Clock()
+
+# classe Player
+
+class Player ( pygame.sprite.Sprite ):
+
+    def __init__(self, *groups):
+        super().__init__(*groups)
+        self.image = pygame.image.load(join ( "images", "player.png")).convert_alpha()
+        self.rect = self.image.get_frect(center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        self.direction = pygame.math.Vector2()
+        self.speed = 300
+
+    def update ( self, dt ):
+
+        keys = pygame.key.get_pressed()
+
+        self.direction.x = int ( keys [ pygame.K_d] or keys [ pygame.K_RIGHT] ) - int ( keys [ pygame.K_a] or keys [ pygame.K_LEFT])
+
+        self.direction.y = int ( keys [ pygame.K_s] or keys [ pygame.K_DOWN]) - int ( keys [ pygame.K_w] or keys [ pygame.K_UP])
+
+        self.direction = self.direction.normalize() if self.direction else self.direction
+
+        self.rect.center += self.direction * dt * self.speed
+
+        recent_keys = pygame.key.get_just_pressed ()
+
+        if recent_keys [ pygame.K_SPACE]:
+            print ("fire!")
+
+# classe star
+
+class Star ( pygame.sprite.Sprite):
+    def __init__(self, surf, *groups,):
+        super().__init__(*groups )
+        self.image = surf
+        self.x = random.randint(0, WINDOW_WIDTH)
+        self.y = random.randint ( 0, WINDOW_HEIGHT)
+        self.rect = self.image.get_frect(center = ( self.x, self.y))
+
+
+# set dos Sprites
+
+all_Sprites = pygame.sprite.Group()
+star_surf = pygame.image.load ( join ("images", "star.png")).convert_alpha()
+stars = [Star ( star_surf, all_Sprites ) for x in range ( 20 ) ]
+player = Player (all_Sprites)
+
+
+
+
 while running:
+
+    dt = clock.tick(60)/ 1000
+
+    # event loop
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    displaySurface.fill ("darkgray")
-    displaySurface.blit (surf, (640,360))
-    pygame.display.update ()
+    # update
+
+    all_Sprites.update(dt)
+
+    # draw
+    
+    displaySurface.fill ( "darkgrey" )
+
+    all_Sprites.draw(displaySurface)
+
+    pygame.display.update()
 
 pygame.quit()
 
