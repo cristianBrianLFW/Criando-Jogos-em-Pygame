@@ -63,7 +63,7 @@ class Player ( pygame.sprite.Sprite ):
         if recent_keys [ pygame.K_SPACE] and self.can_shoot == True:
             self.laser_shoot_time = pygame.time.get_ticks()
             self.can_shoot = False
-            print ("laser")
+            laser(laser_surf, self.rect.midtop, all_Sprites)
 
         self.laser_timer()
 
@@ -84,9 +84,15 @@ class laser ( pygame.sprite.Sprite):
     def __init__(self, surf, pos, groups):
         super().__init__( groups )
         self.image = surf
-        self.rect = self.image.get_frect( center= pos )
+        self.rect = self.image.get_frect( midbottom = pos )
+        self.speed = 400
+    def update(self, dt):
 
-        self.image.set_frect ()
+        self.rect.centery -= self.speed * dt
+
+        if self.rect.bottom < 0:
+            self.kill()
+
 
 
 # set dos Sprites
@@ -103,15 +109,15 @@ stars = [Star ( star_surf, all_Sprites ) for x in range ( 20 ) ]
 player = Player (all_Sprites)
 
     # carregando imagem meteoro
-# laser_surf = pygame.image.load ( join ("images", "laser.png")).convert_alpha()
-# laser_shoot = laser (laser_surf, player.rect, all_Sprites)
+laser_surf = pygame.image.load ( join ("images", "laser.png")).convert_alpha()
+
 
 
 
 
 while running:
 
-    dt = clock.tick(60)/ 1000
+    dt = clock.tick(60) /1000
 
     # event loop
 
